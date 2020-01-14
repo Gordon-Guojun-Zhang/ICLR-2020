@@ -1,5 +1,5 @@
 # ICLR-2020
-code for ICLR 2020
+code for our ICLR 2020 paper: Convergence Behaviour of Some Gradient-Based Methods on Bilinear Zero-Sum Games
 ## In the directory gmm:
 * **gmm_"algorithm".py**: using the "algorithm" to learn Gaussian mixtures, Gauss-Seidel version
 * **gmm_"algorithm"J.py**: using the "algorithm" to learn Gaussian mixtures, Jacobi version
