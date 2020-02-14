@@ -13,135 +13,30 @@ import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import os
+from setup import *
+from gmm_data import *
+from model import *
 
 
-##################################### cuda/GPU ########################################################
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
-
-seed = 12
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.enabled = False
-
-os.environ['PYTHONHASHSEED'] = str(seed)
-np.random.seed(seed)
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
-
-
-
-################################################# data preprocessing #############################################
-
-class Dataset(data.TensorDataset):
-  'Characterizes a dataset for PyTorch'
-  def __init__(self, z):
-      'Initialization, (x, y) is a 2d point array'
-      self.pt = torch.from_numpy(z)  # stack along the column direction
-
-  def __len__(self):
-      'Denotes the total number of samples'
-      return len(self.pt)
-
-  def __getitem__(self, index):
-      'Generates one sample of data'
-      # Load data and get label
-      pt = self.pt[index]
-      return pt
-
-
-
-# np.linspace(start, stop, num)
-# return a 1d grid
-num_mix = 8
-ths = np.linspace(0, 2 * np.pi * (num_mix - 1)/num_mix, num_mix)
-xs, ys = 2 * np.cos(ths), 2 * np.sin(ths)
-
-samples = 100000    # number of samples
-K = np.random.randint(num_mix, size=samples)    # which mixture we choose
-X = np.zeros(samples)
-Y = np.zeros(samples)
-
-
-for _ in range(samples):
-    cx, cy = xs[K[_]], ys[K[_]]
-    X[_], Y[_] = cx + np.random.randn() / 10, cy + np.random.randn() / 10
-
-Z = np.stack((X, Y), axis=-1)
-
-GMM = Dataset(Z)
+device = init_seed()
+train_data = get_data()
 
 ###################################### visualize ###############################################################
 
 
-# Load data
-train_data = GMM
 
 # create loader with data to iterate, batch size is 100
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=True)
 # number of batches, 100000 / 100 = 1000
 num_batches = len(data_loader)
 
-
-################################################# defining G and D #############################################
-import torch.nn.functional as F
-
 # start writing networks
 
-# discriminator: this is a binary classifier, 
-# discriminator: this is a binary classifier,
-class DNet(nn.Module):
-    '''four-layer MLP'''
-    def __init__(self):
-        # call the initializer of the superclass (base class)
-        super(DNet, self).__init__()
-        n_features = 2   # input dimension
-        n_out = 1       # output dimension
-        self.ac = F.relu
-        self.fc1 = nn.Linear(n_features, 256)
-        self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 256)
-        self.fc4 = nn.Linear(256, 1)
-
-    def forward(self, x):
-        x = self.ac(self.fc1(x))
-        x = self.ac(self.fc2(x))
-        x = self.ac(self.fc3(x))
-        x = torch.sigmoid(self.fc4(x))
-        return x
-
 dis = DNet().float().to(device)   # generate a funtion
-
-
-# generator: Z (noise, usually Gaussian) -> X (images)
-class GNet(nn.Module):
-    '''four-layer MLP'''
-    def __init__(self):
-        # call the initializer of the superclass (base class)
-        super(GNet, self).__init__()
-        n_features = 100  # generate from a hidden distribution
-        n_out = 2  # the dimension of the point
-        self.ac = F.relu
-        self.fc1 = nn.Linear(n_features, 256)
-        self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 256)
-        self.fc4 = nn.Linear(256, 2)     # we are generating 2d Gaussian
-
-    def forward(self, x):
-        x = self.ac(self.fc1(x))
-        x = self.ac(self.fc2(x))
-        x = self.ac(self.fc3(x))
-        x = self.fc4(x)
-        return x
 
 gen = GNet().float().to(device)    # generate a function
 
 # hidden: torch.randn(size, 100)
-
-
-
-
 
 ################################################# loss function #############################################
 criterion = nn.BCELoss().to(device)  # binary cross entropy loss, nothing fancy but a dirty way to compute the log
