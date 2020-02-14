@@ -1,5 +1,4 @@
 '''https://medium.com/ai-society/gans-from-scratch-1-a-deep-introduction-with-code-in-pytorch-and-tensorflow-cb03cdcdba0f'''
-
 import torch
 from torch import nn, optim
 # this seems to be discouraged
@@ -13,17 +12,12 @@ import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import os
-from setup import *
-from gmm_data import *
-from model import *
+import setup, gmm_data, model
 
-
-device = init_seed()
-train_data = get_data()
+device = setup.init_seed()
+train_data = gmm_data.get_data()
 
 ###################################### visualize ###############################################################
-
-
 
 # create loader with data to iterate, batch size is 100
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=True)
@@ -32,9 +26,8 @@ num_batches = len(data_loader)
 
 # start writing networks
 
-dis = DNet().float().to(device)   # generate a funtion
-
-gen = GNet().float().to(device)    # generate a function
+dis = model.DNet().float().to(device)   # generate a funtion
+gen = model.GNet().float().to(device)    # generate a function
 
 # hidden: torch.randn(size, 100)
 

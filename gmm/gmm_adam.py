@@ -12,19 +12,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib
 import os
-from setup import *
-from gmm_data import *
-from model import *
+import setup, gmm_data, model
 
 # initialize the random seed and return the device
-device = init_seed()
-GMM = get_data()
-
-###################################### visualize ###############################################################
-#matplotlib.use('Agg')
-
-# Load data
-train_data = GMM
+device = setup.init_seed()
+train_data = gmm_data.get_data()
 
 # create loader with data to iterate, batch size is 100
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=True)
@@ -32,19 +24,13 @@ data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=Tr
 num_batches = len(data_loader)
 
 # generate discriminator and generator
-
-dis = DNet().float().to(device)   # generate a funtion
-
-gen = GNet().float().to(device)    # generate a function
-
-# hidden: torch.randn(size, 100)
+dis = model.DNet().float().to(device)   # generate a funtion
+gen = model.GNet().float().to(device)    # generate a function
 
 ################################################# optimizers #############################################
 lr = 0.0002
 d_opt = optim.Adam(dis.parameters(), lr=lr)   # use Adam, the first argument is the parameters to update
 g_opt = optim.Adam(gen.parameters(), lr=lr)   # use Adam, the first argument is the parameters to update
-
-
 
 ################################################# loss function #############################################
 criterion = nn.BCELoss().to(device)  # binary cross entropy loss, nothing fancy but a dirty way to compute the log
@@ -97,7 +83,6 @@ def train_gen(optimizer, fake_data):
 # some samples from the hidden distribution
 num_test_samples = 2000
 hidden = torch.randn(num_test_samples, 100).to(device)
-
 
 ################################################# start training #################################################
 

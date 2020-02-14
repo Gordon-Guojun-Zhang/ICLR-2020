@@ -12,19 +12,11 @@ import seaborn as sns
 import os
 import matplotlib.pyplot as plt
 import matplotlib
-from setup import *
-from gmm_data import *
-from model import *
-
+import setup, gmm_data, model
 
 ##################################### cuda/GPU ########################################################
-device = init_seed()
-GMM = get_data()
-
-###################################### visualize ###############################################################
-
-# Load data
-train_data = GMM
+device = setup.init_seed()
+train_data = gmm_data.get_data()
 
 # create loader with data to iterate, batch size is 100
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=True)
@@ -32,13 +24,13 @@ data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=Tr
 num_batches = len(data_loader)
 
 
-dis = DNet().float().to(device)   # generate a funtion
+dis = model.DNet().float().to(device)   # generate a funtion
 oldgrad_d = dict()    # gradient two steps ago
 dis.zero_grad() 
 for n, pa in enumerate(dis.parameters()):
 	oldgrad_d[n] = torch.zeros_like(pa)
 
-gen = GNet().float().to(device)    # generate a function
+gen = model.GNet().float().to(device)    # generate a function
 oldgrad_g = dict()                 # gradient two steps ago
 dis.zero_grad() 
 for n, pa in enumerate(gen.parameters()):

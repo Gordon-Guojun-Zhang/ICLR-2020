@@ -12,23 +12,19 @@ import seaborn as sns
 import os
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')
-from setup import *
-from gmm_data import *
-from model import *
+import setup, gmm_data, model
 
 
-device = init_seed()
-train_data = get_data()
+device = setup.init_seed()
+train_data = gmm_data.get_data()
 
 # create loader with data to iterate, batch size is 100
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=100, shuffle=True)
 # number of batches, 100000 / 100 = 1000
 num_batches = len(data_loader)
 
-dis = DNet().float().to(device)   # generate a funtion
-
-gen = GNet().float().to(device)    # generate a function
+dis = model.DNet().float().to(device)   # generate a funtion
+gen = model.GNet().float().to(device)    # generate a function
 
 
 ################################################# optimizers #############################################
