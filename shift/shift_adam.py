@@ -1,6 +1,9 @@
 import torch
 from torch import optim
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+from model import *
 
 
 ################################################# data preprocessing #############################################
@@ -9,27 +12,6 @@ X = np.load("one_gaussian.npy")
 X = torch.tensor(X)
 dim = 2
 sample_size = X.shape[0]
-
-
-###################################### visualize ###############################################################
-
-import matplotlib.pyplot as plt
-import matplotlib
-#matplotlib.use('Agg')
-
-################################################# defining G and D #############################################
-
-# functions
-
-def dis(theta, x):      # compute (1/N)sum_{i=1}^N s(theta.x[i])
-    size = x.shape[0]   # how many samples
-    total = torch.tensor(0)
-    for _ in range(size):
-       total = total + torch.sigmoid(torch.dot(theta.float(), x[_])) 
-    return total / size
-
-def gen(phi, x):
-    return torch.add(phi, x)
 
 # initialization, fix the same initialization
 v = np.ones(dim)
@@ -77,5 +59,3 @@ for epoch in range(num_epochs):
             Phi[(epoch * n_bs + _) // 4] = phi.detach().numpy()
 
 np.save('adam_lr_' + str(lr) + '_r1_' + str(r1) + '_r2_' + str(r2), Phi)
-
-

@@ -2,6 +2,9 @@ import torch
 from torch import optim
 from torch import tensor
 import numpy as np
+from model import *
+import matplotlib.pyplot as plt
+import matplotlib
 
 
 ################################################# data preprocessing #############################################
@@ -10,25 +13,6 @@ X = np.load("one_gaussian.npy")
 X = torch.tensor(X)
 dim = 2
 sample_size = 128 * 128 * 16
-
-###################################### visualize ###############################################################
-
-import matplotlib.pyplot as plt
-import matplotlib
-
-################################################# defining G and D #############################################
-
-# functions
-
-def dis(theta, x):      # compute (1/N)sum_{i=1}^N s(theta.x[i])
-    size = x.shape[0]   # how many samples
-    total = torch.tensor(0.0)
-    for _ in range(size):
-       total = total + torch.sigmoid(torch.dot(theta.float(), x[_])) 
-    return total / size
-
-def gen(phi, x):
-    return torch.add(phi, x)
 
 # initialization, fix the same initialization
 v = np.ones(dim)
